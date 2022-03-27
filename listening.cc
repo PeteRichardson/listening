@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
@@ -37,11 +38,15 @@ Listener::Listener(std::string lsof_line) {
 }
 
 std::ostream& operator<<(std::ostream& out, Listener l) {
-    out << l.port << " " << l.command << " " << l.pid << " " << l.user << " " << l.node << " " << l.name << " " << l.action << endl;
+    // out << std::setw(7) <<  << " " <<  << " " <<  << " " <<  << " " << e << " " <<  << " " << << endl;
+    cout << std::setw(7) << l.port
+         << std::setw(25) << l.command
+         << std::setw(7) << l.pid
+         << std::setw(7) << l.user
+         << std::setw(5) << l.node
+         << std::setw(17) << l.name
+         << std::setw(8) << l.action;
     return out;
-}
-
-void handle_line(std::string line) {
 }
 
 int main(int argc, char*argv[]) {
@@ -68,7 +73,23 @@ int main(int argc, char*argv[]) {
 
     sort(listeners.begin(), listeners.end(), [] (Listener& lhs, Listener& rhs) { return lhs.port < rhs.port; });
 
+    cout << std::setw(7) << "PORT"
+         << std::setw(25) << "COMMAND"
+         << std::setw(7) << "PID"
+         << std::setw(7) << "USER"
+         << std::setw(5) << "NODE"
+         << std::setw(17) << "NAME"
+         << std::setw(8) << "ACTION"
+         << endl;
+    cout << std::setw(7) << "----"
+         << std::setw(25) << "-------"
+         << std::setw(7) << "---"
+         << std::setw(7) << "----"
+         << std::setw(5) << "----"
+         << std::setw(17) << "----"
+         << std::setw(8) << "------"
+         << endl;
     for (auto & l : listeners) {
-        cout << l;
+        cout << l << endl;
     }
 }
