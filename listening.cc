@@ -38,7 +38,6 @@ Listener::Listener(std::string lsof_line) {
 }
 
 std::ostream& operator<<(std::ostream& out, Listener l) {
-    // out << std::setw(7) <<  << " " <<  << " " <<  << " " <<  << " " << e << " " <<  << " " << << endl;
     out << std::setw(7) << l.port
          << std::setw(25) << l.command
          << std::setw(7) << l.pid
@@ -48,7 +47,6 @@ std::ostream& operator<<(std::ostream& out, Listener l) {
          << std::setw(8) << l.action;
     return out;
 }
-
 
 fort::char_table& operator<<(fort::char_table& out, Listener l) {
     // out << std::setw(7) <<  << " " <<  << " " <<  << " " <<  << " " << e << " " <<  << " " << << endl;
@@ -97,3 +95,17 @@ int main(int argc, char*argv[]) {
     std::cout << table.to_string() << std::endl;
 
 }
+
+
+// TODO:  Display the full command line used to start each listener.
+// Steps...
+// 1. add a command field to the Listener struct.
+// 2. Build a map<pid,Listener> from the output of lsof
+// 3. Call ps as below and parse the output lines to fill in the command values.
+// 4. Make the full command line available maybe with a -c option.
+//
+// $ ps -p 967,10035,10147,10166 -o pid="",command=""
+//   967 /usr/libexec/rapportd
+// 10035 /System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter
+// 10147 /Library/Application Support/Adobe/Adobe Desktop Common/ADS/Adobe Desktop Service.app/Contents/MacOS/Adobe Desktop Service --onOSstartup=true --showwindow=false --
+// 10166 /Library/Application Support/Adobe/Creative Cloud Libraries/CCLibrary.app/Contents/MacOS/../libs/node /Library/Application Support/Adobe/Creative Cloud Libraries/C
