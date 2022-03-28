@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iomanip>
 #include <stdio.h>
+#include <map>
 
 Listener::Listener(std::string lsof_line) {
     // node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)
@@ -35,12 +36,13 @@ std::ostream& operator<<(std::ostream& out, Listener l) {
     return out;
 }
 
-
-
 void load_full_commands(std::vector<Listener> & listeners) {
+    std::map<int, Listener&> pid_lookup_table{};
+
     std::stringstream pids{};
     for (auto & l : listeners) {
         pids << l.pid << ",";
+        pid_lookup_table.insert( std::pair<int, Listener&>(l.pid, l));
     }
     std::string cmd{"ps -o pid=\"\",command=\"\" -p "};
     cmd = cmd + pids.str();
@@ -58,9 +60,9 @@ void load_full_commands(std::vector<Listener> & listeners) {
             int pid{};
             std::string full_command{};
             std::stringstream ss{line_buffer};
-            ss >> pid;
+            ss >> pid >> std::ws;
             getline(ss, full_command);
-            std::cout << "GOT PID " << pid << " WITH CMD " << full_command << std::endl;
+            pid_lookup_table.at(pid).full_command = full_command;
         }
     }
     pclose(fp);
@@ -85,6 +87,7 @@ Listeners GetListeners(void) {
         }
     }
     pclose(fp);
+
     load_full_commands(listeners);
 
     sort(listeners.begin(), listeners.end(), [] (Listener& lhs, Listener& rhs) { return lhs.port < rhs.port; });
