@@ -8,7 +8,8 @@ ENDIF(APPLE)
 project(listening)
 
 add_executable(listening
-    listening.cc)
+    listening.cc
+    listener.cc)
 
 target_compile_features(listening PUBLIC cxx_std_20)
 # Disable building tests and examples in libfort project
