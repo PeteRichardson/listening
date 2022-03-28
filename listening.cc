@@ -14,6 +14,7 @@ struct Listener {
     std::string node;
     std::string name{};
     std::string action{"LISTEN"};
+    std::string full_command{};
 
     Listener(std::string);
 };
@@ -35,6 +36,7 @@ Listener::Listener(std::string lsof_line) {
     size_t pos = name.find(":");
     auto namestr = name.substr(pos+1);
     this->port = stoi(namestr);
+    this->full_command = command;
 }
 
 std::ostream& operator<<(std::ostream& out, Listener l) {
@@ -56,8 +58,34 @@ fort::char_table& operator<<(fort::char_table& out, Listener l) {
         << l.user
         << l.node
         << l.name
-        << l.action;
+        << l.action
+        << l.full_command;
     return out;
+}
+
+void dump_full_commands(std::vector<Listener> listeners) {
+    std::stringstream pids{};
+    for (auto & l : listeners) {
+        pids << l.pid << ",";
+    }
+    std::string cmd{"ps -o pid=\"\",command=\"\" -p "};
+    cmd = cmd + pids.str();
+
+    FILE *fp = popen(cmd.c_str(), "r");
+    if (fp == NULL) {
+        std::cerr << "Failed to run command '" << cmd << "'" << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    const size_t kBUFSIZE = 512;
+    char line_buffer[kBUFSIZE];
+    while (!feof(fp)) {
+        if (fgets(line_buffer, kBUFSIZE, fp) != NULL) {
+            std::string line{line_buffer};
+            std::cout << line << std::endl;
+        }
+    }
+    pclose(fp);
 }
 
 int main(int argc, char*argv[]) {
@@ -87,25 +115,13 @@ int main(int argc, char*argv[]) {
     fort::char_table table;
     table.set_border_style(FT_SOLID_ROUND_STYLE);
 
-    table << fort::header << "PORT" << "COMMAND" << "PID" << "USER" << "NODE" << "NAME" << "ACTION" << fort::endr;
+    table << fort::header << "PORT" << "COMMAND" << "PID" << "USER" << "NODE" << "NAME" << "ACTION" << "FULL COMMAND" << fort::endr;
     for (auto & l : listeners)
         table << l << fort::endr;
     table.column(5).set_cell_text_align(fort::text_align::right);
 
     std::cout << table.to_string() << std::endl;
 
+    dump_full_commands(listeners);
+
 }
-
-
-// TODO:  Display the full command line used to start each listener.
-// Steps...
-// 1. add a command field to the Listener struct.
-// 2. Build a map<pid,Listener> from the output of lsof
-// 3. Call ps as below and parse the output lines to fill in the command values.
-// 4. Make the full command line available maybe with a -c option.
-//
-// $ ps -p 967,10035,10147,10166 -o pid="",command=""
-//   967 /usr/libexec/rapportd
-// 10035 /System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter
-// 10147 /Library/Application Support/Adobe/Adobe Desktop Common/ADS/Adobe Desktop Service.app/Contents/MacOS/Adobe Desktop Service --onOSstartup=true --showwindow=false --
-// 10166 /Library/Application Support/Adobe/Creative Cloud Libraries/CCLibrary.app/Contents/MacOS/../libs/node /Library/Application Support/Adobe/Creative Cloud Libraries/C
