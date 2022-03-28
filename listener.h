@@ -9,9 +9,10 @@ struct Listener {
     int port{};
     std::string command{};
     int pid;
+    std::string fd;
     std::string user;
     std::string node;
-    std::string name{};
+    std::string inaddr{};
     std::string action{"LISTEN"};
     std::string full_command{};
 

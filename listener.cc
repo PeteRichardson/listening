@@ -11,18 +11,18 @@ Listener::Listener(std::string lsof_line) {
     std::string dummy;
 
     ss >> this->command >> this->pid >> this->user;
-    ss >> dummy >> dummy >> dummy >> dummy >> this->node;
-    ss >> this->name;
+    ss >> this->fd >> dummy >> dummy >> dummy >> this->node;
+    ss >> this->inaddr;
 
     std::string escaped_space = "\\x20";
     while(this->command.find(escaped_space) != std::string::npos) {
         this->command.replace(this->command.find(escaped_space), escaped_space.size(), " ");
     };
 
-    size_t pos = name.find(":");
-    auto namestr = name.substr(pos+1);
-    this->name.erase(pos);
-    this->port = stoi(namestr);
+    size_t pos = inaddr.find(":");
+    auto inaddrstr = inaddr.substr(pos+1);
+    this->inaddr.erase(pos);
+    this->port = stoi(inaddrstr);
     this->full_command = command;
 }
 
@@ -30,9 +30,10 @@ std::ostream& operator<<(std::ostream& out, Listener l) {
     out << std::setw(7) << l.port
          << std::setw(25) << l.command
          << std::setw(7) << l.pid
+         << std::setw(7) << l.fd
          << std::setw(7) << l.user
          << std::setw(5) << l.node
-         << std::setw(17) << l.name
+         << std::setw(17) << l.inaddr
          << std::setw(8) << l.action;
     return out;
 }
