@@ -63,7 +63,7 @@ fort::char_table& operator<<(fort::char_table& out, Listener l) {
     return out;
 }
 
-void dump_full_commands(std::vector<Listener> listeners) {
+void load_full_commands(std::vector<Listener> & listeners) {
     std::stringstream pids{};
     for (auto & l : listeners) {
         pids << l.pid << ",";
@@ -81,8 +81,12 @@ void dump_full_commands(std::vector<Listener> listeners) {
     char line_buffer[kBUFSIZE];
     while (!feof(fp)) {
         if (fgets(line_buffer, kBUFSIZE, fp) != NULL) {
-            std::string line{line_buffer};
-            std::cout << line << std::endl;
+            int pid{};
+            std::string full_command{};
+            std::stringstream ss{line_buffer};
+            ss >> pid;
+            getline(ss, full_command);
+            std::cout << "GOT PID " << pid << " WITH CMD " << full_command << std::endl;
         }
     }
     pclose(fp);
@@ -109,6 +113,7 @@ int main(int argc, char*argv[]) {
         }
     }
     pclose(fp);
+    load_full_commands(listeners);
 
     sort(listeners.begin(), listeners.end(), [] (Listener& lhs, Listener& rhs) { return lhs.port < rhs.port; });
 
@@ -122,6 +127,5 @@ int main(int argc, char*argv[]) {
 
     std::cout << table.to_string() << std::endl;
 
-    dump_full_commands(listeners);
-
+    
 }
