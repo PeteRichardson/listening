@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <vector>
 
-using std::cout, std::endl;
+#include "fort.hpp"
 
 struct Listener {
     int port{};
@@ -39,7 +39,7 @@ Listener::Listener(std::string lsof_line) {
 
 std::ostream& operator<<(std::ostream& out, Listener l) {
     // out << std::setw(7) <<  << " " <<  << " " <<  << " " <<  << " " << e << " " <<  << " " << << endl;
-    cout << std::setw(7) << l.port
+    out << std::setw(7) << l.port
          << std::setw(25) << l.command
          << std::setw(7) << l.pid
          << std::setw(7) << l.user
@@ -49,12 +49,25 @@ std::ostream& operator<<(std::ostream& out, Listener l) {
     return out;
 }
 
+
+fort::char_table& operator<<(fort::char_table& out, Listener l) {
+    // out << std::setw(7) <<  << " " <<  << " " <<  << " " <<  << " " << e << " " <<  << " " << << endl;
+    out << l.port
+        << l.command
+        << l.pid
+        << l.user
+        << l.node
+        << l.name
+        << l.action;
+    return out;
+}
+
 int main(int argc, char*argv[]) {
     char cmd[]{"lsof -nP +c 0 -i4"};
 
     FILE *fp = popen(cmd, "r");
     if (fp == NULL) {
-        std::cerr << "Failed to run command '" << cmd << "'" << endl;
+        std::cerr << "Failed to run command '" << cmd << "'" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
@@ -73,23 +86,14 @@ int main(int argc, char*argv[]) {
 
     sort(listeners.begin(), listeners.end(), [] (Listener& lhs, Listener& rhs) { return lhs.port < rhs.port; });
 
-    cout << std::setw(7) << "PORT"
-         << std::setw(25) << "COMMAND"
-         << std::setw(7) << "PID"
-         << std::setw(7) << "USER"
-         << std::setw(5) << "NODE"
-         << std::setw(17) << "NAME"
-         << std::setw(8) << "ACTION"
-         << endl;
-    cout << std::setw(7) << "----"
-         << std::setw(25) << "-------"
-         << std::setw(7) << "---"
-         << std::setw(7) << "----"
-         << std::setw(5) << "----"
-         << std::setw(17) << "----"
-         << std::setw(8) << "------"
-         << endl;
-    for (auto & l : listeners) {
-        cout << l << endl;
-    }
+    fort::char_table table;
+    table.set_border_style(FT_SOLID_ROUND_STYLE);
+
+    table << fort::header << "PORT" << "COMMAND" << "PID" << "USER" << "NODE" << "NAME" << "ACTION" << fort::endr;
+    for (auto & l : listeners)
+        table << l << fort::endr;
+    table.column(5).set_cell_text_align(fort::text_align::right);
+
+    std::cout << table.to_string() << std::endl;
+
 }
