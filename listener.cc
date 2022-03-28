@@ -21,6 +21,7 @@ Listener::Listener(std::string lsof_line) {
 
     size_t pos = name.find(":");
     auto namestr = name.substr(pos+1);
+    this->name.erase(pos);
     this->port = stoi(namestr);
     this->full_command = command;
 }
