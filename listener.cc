@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <stdio.h>
 #include <map>
+#include <sys/syslimits.h>
+#include <sys/types.h>
 
 Listener::Listener(std::string lsof_line) {
     // node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)
@@ -39,7 +41,7 @@ std::ostream& operator<<(std::ostream& out, Listener l) {
 }
 
 void load_full_commands(std::vector<Listener> & listeners) {
-    std::map<int, Listener&> pid_lookup_table{};
+    std::map<pid_t, Listener&> pid_lookup_table{};
 
     std::stringstream pids{};
     for (auto & l : listeners) {
@@ -55,16 +57,20 @@ void load_full_commands(std::vector<Listener> & listeners) {
         std::exit(EXIT_FAILURE);
     }
 
-    const size_t kBUFSIZE = 512;
+    
+    const size_t kBUFSIZE = ARG_MAX; // need sufficient mem else long cmd lines
+                                     // will be split and parsing will fail 
     char line_buffer[kBUFSIZE];
     while (!feof(fp)) {
         if (fgets(line_buffer, kBUFSIZE, fp) != NULL) {
-            int pid{};
+            pid_t pid { -1 };   
             std::string full_command{};
             std::stringstream ss{line_buffer};
             ss >> pid >> std::ws;
-            getline(ss, full_command);
-            pid_lookup_table.at(pid).full_command = full_command;
+            if (pid != -1) {
+                getline(ss, full_command);
+                pid_lookup_table.at(pid).full_command = full_command;
+            };
         }
     }
     pclose(fp);

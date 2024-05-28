@@ -4,11 +4,12 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <sys/types.h>
 
 struct Listener {
     int port{};
     std::string command{};
-    int pid;
+    pid_t pid;
     std::string fd;
     std::string user;
     std::string node;
