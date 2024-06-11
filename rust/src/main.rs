@@ -87,15 +87,13 @@ impl Hash for Listener {
 
 #[derive(Clone)]
 struct ListenerList {
-    listeners: HashSet<Listener>,
+    listeners: Vec<Listener>,
 }
 
 impl ListenerList {
     fn new() -> Self {
-        let mut listeners: HashSet<Listener> = HashSet::new();
-
-        //'lsof -nP +c 0 -i4' command returns lines like the following:
-        //node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)
+        // create a temporary HashSet to dedup results
+        let mut listeners_hash: HashSet<Listener> = HashSet::new();
 
         let lsof_lines = Command::new("lsof")
             .arg("-nP")
@@ -105,13 +103,19 @@ impl ListenerList {
             .output()
             .unwrap();
         let stdout = String::from_utf8(lsof_lines.stdout).expect("bad stdout from lsof command");
+
+        //'lsof -nP +c 0 -i4' command returns lines like the following:
+        //node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)
         for line in stdout.lines().skip(1).collect::<HashSet<_>>() {
             if line.ends_with("(LISTEN)") {
-                listeners.insert(Listener::new(line));
+                listeners_hash.insert(Listener::new(line));
             }
         }
-        //ListenerList::sort_by_port_order(&mut listeners);
-        Self { listeners }
+        let mut listener_vec: Vec<Listener> = listeners_hash.into_iter().collect();
+        listener_vec.sort_by(|a, b| a.port.cmp(&b.port));
+        Self {
+            listeners: listener_vec,
+        }
     }
 }
 
