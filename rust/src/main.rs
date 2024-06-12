@@ -38,19 +38,32 @@ impl Listener {
         let splits: Vec<&str> = lsof_line.split_ascii_whitespace().collect();
         //println!("{:?}", splits);
 
+        let pid = splits[1].parse::<u32>().unwrap();
+
         let (inaddr, port) = splits[8].split_once(':').expect("couldn't split");
 
         Self {
             command: splits[0].to_string().replace("\\x20", " "),
             port: port.parse::<u32>().unwrap(),
-            pid: splits[1].parse::<u32>().unwrap(),
+            pid,
             fd: splits[3].to_string(),
             user: splits[2].to_string(),
             node: splits[7].to_string(),
             inaddr: inaddr.to_string(),
             action: "LISTEN".to_string(), // todo: trim parens off this value
-            full_command: lsof_line.to_string(),
+            full_command: Listener::get_full_command(pid),
         }
+    }
+
+    fn get_full_command(pid: u32) -> String {
+        let pid = pid.to_string();
+        let ports = Command::new("ps")
+            .args(["-p", &pid, "-o", "command=", "-w", "-w"])
+            .output()
+            .unwrap();
+
+        let stdout = String::from_utf8(ports.stdout).expect("bad stdout from echo");
+        stdout.trim().to_string()
     }
 }
 
@@ -144,7 +157,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     if config.commands {
         for listener in listeners.listeners {
-            println!("{}", listener.full_command);
+            println!("{}: {}", listener.pid, listener.full_command);
         }
     };
     Ok(())
