@@ -11,6 +11,7 @@ use tabled::{
 #[derive(Parser, Debug, Clone)]
 #[command(version, about)]
 struct Config {
+    /// Show full command for each PID
     #[clap(long, short, action)]
     commands: bool,
 }
@@ -99,11 +100,11 @@ impl Hash for Listener {
 }
 
 #[derive(Clone)]
-struct ListenerList {
-    listeners: Vec<Listener>,
+struct ListenerHash {
+    listeners: HashSet<Listener>,
 }
 
-impl ListenerList {
+impl ListenerHash {
     fn new() -> Self {
         // create a temporary HashSet to dedup results
         let mut listeners_hash: HashSet<Listener> = HashSet::new();
@@ -124,16 +125,17 @@ impl ListenerList {
                 listeners_hash.insert(Listener::new(line));
             }
         }
-        let mut listener_vec: Vec<Listener> = listeners_hash.into_iter().collect();
-        listener_vec.sort_by(|a, b| a.port.cmp(&b.port));
         Self {
-            listeners: listener_vec,
+            listeners: listeners_hash,
         }
     }
 }
 
-fn print_table(list: &ListenerList) -> Result<(), Box<dyn Error>> {
-    let mut table = Table::new(list.listeners.clone());
+fn print_table(list: &ListenerHash) -> Result<(), Box<dyn Error>> {
+    
+    let mut listener_vec: Vec<Listener> = list.listeners.clone().into_iter().collect();
+    listener_vec.sort_by(|a, b| a.port.cmp(&b.port));
+    let mut table = Table::new(listener_vec);
     table
         .with(Style::rounded())
         .with(Colorization::columns([
@@ -152,11 +154,15 @@ fn print_table(list: &ListenerList) -> Result<(), Box<dyn Error>> {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = Config::parse();
 
-    let listeners = ListenerList::new();
+    let listeners = ListenerHash::new();
     print_table(&listeners).expect("Failed to output listeners table");
 
     if config.commands {
-        for listener in listeners.listeners {
+        // sort listeners by PID, dedup on PID, and print out full_commands
+        let mut listener_vec: Vec<Listener> = listeners.listeners.into_iter().collect();
+        listener_vec.sort_by(|a, b| a.pid.cmp(&b.pid));
+        listener_vec.dedup_by(|a, b| a.pid == b.pid);
+        for listener in listener_vec {
             println!("{}: {}", listener.pid, listener.full_command);
         }
     };
