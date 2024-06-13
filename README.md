@@ -18,6 +18,6 @@ Versions in Swift, Cpp and Rust
 
 
 * Use ```-c``` option to append a lookup table of the command for each PID  
-  ** <img width="874" alt="listening-rs-c" src="https://github.com/PeteRichardson/listening/assets/979694/f3dcf011-37eb-4e39-96ca-6d6b21c4c9ea">
+  <img width="874" alt="listening-rs-c" src="https://github.com/PeteRichardson/listening/assets/979694/f3dcf011-37eb-4e39-96ca-6d6b21c4c9ea">
 
 
