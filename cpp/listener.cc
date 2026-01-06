@@ -78,7 +78,7 @@ void load_full_commands(std::vector<Listener> & listeners) {
 
 Listeners GetListeners(void) {
     Listeners listeners{};
-    char cmd[]{"lsof -nP +c 0 -i4"};
+    char cmd[]{"lsof -nP +c 0 -i4 2>&1"};
 
     FILE *fp = popen(cmd, "r");
     if (fp == NULL) {
