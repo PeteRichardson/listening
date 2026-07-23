@@ -109,7 +109,7 @@ impl ListenerHash {
         // create a temporary HashSet to dedup results
         let mut listeners_hash: HashSet<Listener> = HashSet::new();
 
-        let lsof_lines = Command::new("lsof")
+        let lsof_lines = Command::new("/usr/sbin/lsof")
             .arg("-nP")
             .arg("+c")
             .arg("0")
