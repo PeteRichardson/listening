@@ -85,8 +85,10 @@ impl fmt::Display for Listener {
 }
 impl PartialEq for Listener {
     fn eq(&self, other: &Self) -> bool {
-        self.command == other.command && self.pid == other.pid
-            && self.port == other.port && self.inaddr == other.inaddr
+        self.command == other.command
+            && self.pid == other.pid
+            && self.port == other.port
+            && self.inaddr == other.inaddr
     }
 }
 impl Eq for Listener {}
@@ -149,6 +151,33 @@ fn print_table(list: &ListenerHash) {
         .modify(Columns::new(3..4), Alignment::right());
 
     println!("{}", table);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_basic_fields() {
+        let line = "node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)";
+        let l = Listener::new(line).unwrap();
+        assert_eq!(l.command, "node");
+        assert_eq!(l.pid, 10166);
+        assert_eq!(l.user, "pete");
+        assert_eq!(l.fd, "31u");
+        assert_eq!(l.node, "TCP");
+        assert_eq!(l.inaddr, "127.0.0.1");
+        assert_eq!(l.port, 45623);
+        assert_eq!(l.action, "LISTEN");
+    }
+
+    #[test]
+    fn unescapes_spaces_in_command() {
+        let line = "Adobe\\x20Desktop\\x20Service  1102 pete   10u  IPv4 0x6c6607cf201365e5      0t0  TCP 127.0.0.1:15292 (LISTEN)";
+        let l = Listener::new(line).unwrap();
+        assert_eq!(l.command, "Adobe Desktop Service");
+        assert_eq!(l.port, 15292);
+    }
 }
 
 fn main() {

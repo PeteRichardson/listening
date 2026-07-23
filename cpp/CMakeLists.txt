@@ -31,3 +31,10 @@ add_executable(listening
 target_compile_features(listening PUBLIC cxx_std_20)
 target_include_directories(listening PUBLIC "${LIBFORT_DIR}")
 target_link_libraries(listening PRIVATE libfort)
+
+add_executable(listener_tests
+    test/listener_test.cc
+    listener.cc
+)
+target_compile_features(listener_tests PUBLIC cxx_std_20)
+target_include_directories(listener_tests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
