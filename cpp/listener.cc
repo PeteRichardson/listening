@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <stdio.h>
 #include <map>
+#include <memory>
 #include <sys/syslimits.h>
 #include <sys/types.h>
 
@@ -22,9 +23,14 @@ Listener::Listener(std::string lsof_line) {
     };
 
     size_t pos = inaddr.find(":");
-    auto inaddrstr = inaddr.substr(pos+1);
-    this->inaddr.erase(pos);
-    this->port = stoi(inaddrstr);
+    if (pos != std::string::npos) {
+        auto inaddrstr = inaddr.substr(pos+1);
+        this->inaddr.erase(pos);
+        if (!inaddrstr.empty() &&
+            inaddrstr.find_first_not_of("0123456789") == std::string::npos) {
+            this->port = stoi(inaddrstr);
+        }
+    }
     this->full_command = command;
 }
 
@@ -51,18 +57,18 @@ void load_full_commands(std::vector<Listener> & listeners) {
     std::string cmd{"ps -o pid=\"\",command=\"\" -p "};
     cmd = cmd + pids.str();
 
-    FILE *fp = popen(cmd.c_str(), "r");
-    if (fp == NULL) {
+    auto fp = std::unique_ptr<FILE, decltype(&pclose)>(popen(cmd.c_str(), "r"), pclose);
+    if (!fp) {
         std::cerr << "Failed to run command '" << cmd << "'" << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
-    
+
     const size_t kBUFSIZE = ARG_MAX; // need sufficient mem else long cmd lines
                                      // will be split and parsing will fail
     std::vector<char> line_buffer(kBUFSIZE);
-    while (!feof(fp)) {
-        if (fgets(line_buffer.data(), kBUFSIZE, fp) != NULL) {
+    while (!feof(fp.get())) {
+        if (fgets(line_buffer.data(), kBUFSIZE, fp.get()) != NULL) {
             pid_t pid { -1 };
             std::string full_command{};
             std::stringstream ss{line_buffer.data()};
@@ -77,15 +83,14 @@ void load_full_commands(std::vector<Listener> & listeners) {
             };
         }
     }
-    pclose(fp);
 }
 
 Listeners GetListeners(void) {
     Listeners listeners{};
     char cmd[]{"lsof -nP +c 0 -i4 2>&1"};
 
-    FILE *fp = popen(cmd, "r");
-    if (fp == NULL) {
+    auto fp = std::unique_ptr<FILE, decltype(&pclose)>(popen(cmd, "r"), pclose);
+    if (!fp) {
         std::cerr << "Failed to run command '" << cmd << "'" << std::endl;
         std::exit(EXIT_FAILURE);
     }
@@ -93,14 +98,13 @@ Listeners GetListeners(void) {
     // fgets silently truncate them, producing garbled parsed fields.
     const size_t kBUFSIZE = 4096;
     char line_buffer[kBUFSIZE];
-    while (!feof(fp)) {
-        if (fgets(line_buffer, kBUFSIZE, fp) != NULL) {
+    while (!feof(fp.get())) {
+        if (fgets(line_buffer, kBUFSIZE, fp.get()) != NULL) {
             std::string line{line_buffer};
             if (line.ends_with("(LISTEN)\n"))
                 listeners.push_back(Listener(line));
         }
     }
-    pclose(fp);
 
     load_full_commands(listeners);
 
