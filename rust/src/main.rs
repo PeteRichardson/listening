@@ -43,7 +43,7 @@ impl Listener {
         let (inaddr, port) = splits.get(8)?.split_once(':')?;
 
         Some(Self {
-            command: splits.get(0)?.to_string().replace("\\x20", " "),
+            command: splits.first()?.to_string().replace("\\x20", " "),
             port: port.parse::<u32>().ok()?,
             pid,
             fd: splits.get(3)?.to_string(),
