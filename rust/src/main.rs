@@ -154,7 +154,7 @@ fn print_table(list: &ListenerHash) {
         ]))
         .modify(Columns::new(3..4), Alignment::right());
 
-    println!("{}", table);
+    println!("{table}");
 }
 
 #[cfg(test)]
@@ -198,5 +198,5 @@ fn main() {
         for listener in listener_vec {
             println!("{}: {}", listener.pid, listener.full_command);
         }
-    };
+    }
 }
