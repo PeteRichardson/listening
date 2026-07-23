@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
+project(listening)
+
 SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
 
 # Make a static libfort library with only fort.c and fort.hpp
@@ -20,8 +22,6 @@ set(LIBFORT_DIR "${libfort_src_SOURCE_DIR}/lib")
 add_library(libfort STATIC
   "${LIBFORT_DIR}/fort.c"
 )
-
-project(listening)
 
 add_executable(listening
     listening.cc
