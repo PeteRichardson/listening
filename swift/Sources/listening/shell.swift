@@ -29,8 +29,8 @@ func shell(_ launchPath: String, _ arguments: [String] = []) -> (String?, String
     do {
         try task.run()
     } catch {
-        // handle errors
         print("Error: \(error.localizedDescription)")
+        return (nil, nil, -1)
     }
     
     let outdata = outpipe.fileHandleForReading.readDataToEndOfFile()
