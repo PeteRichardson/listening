@@ -80,7 +80,13 @@ struct Listener : CustomStringConvertible {
         node        = String(match.node)
         inaddr      = String(match.inaddr)
         action      = String(match.action)
-        fullCommand = ""
+        fullCommand = Listener.getFullCommand(pid: pid)
+    }
+
+    /// look up the full invocation command line for a PID via `ps`
+    static func getFullCommand(pid: Int) -> String {
+        let (stdout, _, _) = shell("/bin/ps", ["-p", String(pid), "-o", "command=", "-w", "-w"])
+        return stdout?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
     
     var description: String {
