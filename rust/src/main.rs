@@ -34,25 +34,25 @@ struct Listener {
 }
 
 impl Listener {
-    fn new(lsof_line: &str) -> Self {
+    fn new(lsof_line: &str) -> Option<Self> {
         let splits: Vec<&str> = lsof_line.split_ascii_whitespace().collect();
         //println!("{:?}", splits);
 
-        let pid = splits[1].parse::<u32>().unwrap();
+        let pid = splits.get(1)?.parse::<u32>().ok()?;
 
-        let (inaddr, port) = splits[8].split_once(':').expect("couldn't split");
+        let (inaddr, port) = splits.get(8)?.split_once(':')?;
 
-        Self {
-            command: splits[0].to_string().replace("\\x20", " "),
-            port: port.parse::<u32>().unwrap(),
+        Some(Self {
+            command: splits.get(0)?.to_string().replace("\\x20", " "),
+            port: port.parse::<u32>().ok()?,
             pid,
-            fd: splits[3].to_string(),
-            user: splits[2].to_string(),
-            node: splits[7].to_string(),
+            fd: splits.get(3)?.to_string(),
+            user: splits.get(2)?.to_string(),
+            node: splits.get(7)?.to_string(),
             inaddr: inaddr.to_string(),
             action: "LISTEN".to_string(),
             full_command: Listener::get_full_command(pid),
-        }
+        })
     }
 
     fn get_full_command(pid: u32) -> String {
@@ -122,7 +122,9 @@ impl ListenerHash {
         //node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)
         for line in stdout.lines().collect::<HashSet<_>>() {
             if line.ends_with("(LISTEN)") {
-                listeners_hash.insert(Listener::new(line));
+                if let Some(listener) = Listener::new(line) {
+                    listeners_hash.insert(listener);
+                }
             }
         }
         Self {
