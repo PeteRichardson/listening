@@ -85,7 +85,9 @@ Listeners GetListeners(void) {
         std::cerr << "Failed to run command '" << cmd << "'" << std::endl;
         std::exit(EXIT_FAILURE);
     }
-    const size_t kBUFSIZE = 512;
+    // lsof lines can include long process paths; a small buffer would let
+    // fgets silently truncate them, producing garbled parsed fields.
+    const size_t kBUFSIZE = 4096;
     char line_buffer[kBUFSIZE];
     while (!feof(fp)) {
         if (fgets(line_buffer, kBUFSIZE, fp) != NULL) {
