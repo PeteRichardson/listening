@@ -9,7 +9,7 @@ static struct {
     bool  show_full_commands {false};    // -c: list full invocation command lines after table
 } options;
 
-fort::char_table& operator<<(fort::char_table& out, Listener l) {
+fort::char_table& operator<<(fort::char_table& out, const Listener& l) {
     out << l.port << l.command << l.pid << l.fd << l.user << l.node  << l.inaddr << l.action;
     return out;
 }
