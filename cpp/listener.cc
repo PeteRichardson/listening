@@ -59,13 +59,13 @@ void load_full_commands(std::vector<Listener> & listeners) {
 
     
     const size_t kBUFSIZE = ARG_MAX; // need sufficient mem else long cmd lines
-                                     // will be split and parsing will fail 
-    char line_buffer[kBUFSIZE];
+                                     // will be split and parsing will fail
+    std::vector<char> line_buffer(kBUFSIZE);
     while (!feof(fp)) {
-        if (fgets(line_buffer, kBUFSIZE, fp) != NULL) {
-            pid_t pid { -1 };   
+        if (fgets(line_buffer.data(), kBUFSIZE, fp) != NULL) {
+            pid_t pid { -1 };
             std::string full_command{};
-            std::stringstream ss{line_buffer};
+            std::stringstream ss{line_buffer.data()};
             ss >> pid >> std::ws;
             if (pid != -1) {
                 getline(ss, full_command);
