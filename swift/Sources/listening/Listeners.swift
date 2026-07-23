@@ -33,7 +33,7 @@ struct Listener : CustomStringConvertible {
     
     // regex that matches lines from "/usr/sbin/lsof -nP +c 0 -i4" like:
     // Adobe\x20Desktop\x20Service  1102 pete   10u  IPv4 0x6c6607cf201365e5      0t0  TCP 127.0.0.1:15292 (LISTEN)
-    let lsofRegex = #/
+    static let lsofRegex = #/
         (?<command>\S+)
         \s+
         (?<pid>\d+)
@@ -61,7 +61,7 @@ struct Listener : CustomStringConvertible {
     
     /// use regex to create a Listener from a line from the output of /usr/sbin/lsof -nP +c 0 -i4
     init?(_ lsofRow : String) {
-        guard let match = try? lsofRegex.wholeMatch(in: lsofRow) else {
+        guard let match = try? Self.lsofRegex.wholeMatch(in: lsofRow) else {
             //            print("# ERROR: Listener(\"\(lsofRow)\") init failed.")
             return nil
         }
