@@ -57,7 +57,7 @@ impl Listener {
 
     fn get_full_command(pid: u32) -> String {
         let pid = pid.to_string();
-        let ports = Command::new("ps")
+        let ports = Command::new("/bin/ps")
             .args(["-p", &pid, "-o", "command=", "-w", "-w"])
             .output()
             .unwrap();
