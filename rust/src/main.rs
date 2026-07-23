@@ -153,6 +153,23 @@ fn print_table(list: &ListenerHash) {
     println!("{}", table);
 }
 
+fn main() {
+    let config = Config::parse();
+
+    let listeners = ListenerHash::new();
+    print_table(&listeners);
+
+    if config.commands {
+        // sort listeners by PID, dedup on PID, and print out full_commands
+        let mut listener_vec: Vec<Listener> = listeners.listeners.into_iter().collect();
+        listener_vec.sort_by_key(|l| l.pid);
+        listener_vec.dedup_by(|a, b| a.pid == b.pid);
+        for listener in listener_vec {
+            println!("{}: {}", listener.pid, listener.full_command);
+        }
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -178,21 +195,4 @@ mod tests {
         assert_eq!(l.command, "Adobe Desktop Service");
         assert_eq!(l.port, 15292);
     }
-}
-
-fn main() {
-    let config = Config::parse();
-
-    let listeners = ListenerHash::new();
-    print_table(&listeners);
-
-    if config.commands {
-        // sort listeners by PID, dedup on PID, and print out full_commands
-        let mut listener_vec: Vec<Listener> = listeners.listeners.into_iter().collect();
-        listener_vec.sort_by_key(|l| l.pid);
-        listener_vec.dedup_by(|a, b| a.pid == b.pid);
-        for listener in listener_vec {
-            println!("{}: {}", listener.pid, listener.full_command);
-        }
-    };
 }
