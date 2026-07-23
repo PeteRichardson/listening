@@ -34,7 +34,7 @@ Listener::Listener(std::string lsof_line) {
     this->full_command = command;
 }
 
-std::ostream& operator<<(std::ostream& out, Listener l) {
+std::ostream& operator<<(std::ostream& out, const Listener& l) {
     out << std::setw(7) << l.port
          << std::setw(25) << l.command
          << std::setw(7) << l.pid

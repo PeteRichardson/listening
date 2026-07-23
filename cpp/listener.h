@@ -24,6 +24,6 @@ using Listeners = std::vector<Listener>;
 
 Listeners GetListeners(void);
 
-std::ostream& operator<<(std::ostream&, Listener);
+std::ostream& operator<<(std::ostream&, const Listener&);
 
 #endif
