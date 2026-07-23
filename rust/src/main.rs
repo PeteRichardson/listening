@@ -34,7 +34,7 @@ struct Listener {
 }
 
 impl Listener {
-    fn new(lsof_line: &str) -> Option<Self> {
+    fn new(lsof_line: &str, resolve_full_command: bool) -> Option<Self> {
         let splits: Vec<&str> = lsof_line.split_ascii_whitespace().collect();
         //println!("{:?}", splits);
 
@@ -51,7 +51,11 @@ impl Listener {
             node: splits.get(7)?.to_string(),
             inaddr: inaddr.to_string(),
             action: "LISTEN".to_string(),
-            full_command: Listener::get_full_command(pid),
+            full_command: if resolve_full_command {
+                Listener::get_full_command(pid)
+            } else {
+                String::new()
+            },
         })
     }
 
@@ -107,7 +111,7 @@ struct ListenerHash {
 }
 
 impl ListenerHash {
-    fn new() -> Self {
+    fn new(resolve_full_command: bool) -> Self {
         // create a temporary HashSet to dedup results
         let mut listeners_hash: HashSet<Listener> = HashSet::new();
 
@@ -124,7 +128,7 @@ impl ListenerHash {
         //node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)
         for line in stdout.lines().collect::<HashSet<_>>() {
             if line.ends_with("(LISTEN)") {
-                if let Some(listener) = Listener::new(line) {
+                if let Some(listener) = Listener::new(line, resolve_full_command) {
                     listeners_hash.insert(listener);
                 }
             }
@@ -160,7 +164,7 @@ mod tests {
     #[test]
     fn parses_basic_fields() {
         let line = "node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)";
-        let l = Listener::new(line).unwrap();
+        let l = Listener::new(line, false).unwrap();
         assert_eq!(l.command, "node");
         assert_eq!(l.pid, 10166);
         assert_eq!(l.user, "pete");
@@ -174,7 +178,7 @@ mod tests {
     #[test]
     fn unescapes_spaces_in_command() {
         let line = "Adobe\\x20Desktop\\x20Service  1102 pete   10u  IPv4 0x6c6607cf201365e5      0t0  TCP 127.0.0.1:15292 (LISTEN)";
-        let l = Listener::new(line).unwrap();
+        let l = Listener::new(line, false).unwrap();
         assert_eq!(l.command, "Adobe Desktop Service");
         assert_eq!(l.port, 15292);
     }
@@ -183,7 +187,7 @@ mod tests {
 fn main() {
     let config = Config::parse();
 
-    let listeners = ListenerHash::new();
+    let listeners = ListenerHash::new(config.commands);
     print_table(&listeners);
 
     if config.commands {

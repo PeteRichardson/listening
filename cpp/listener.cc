@@ -85,7 +85,7 @@ void load_full_commands(std::vector<Listener> & listeners) {
     }
 }
 
-Listeners GetListeners(void) {
+Listeners GetListeners(bool resolve_full_commands) {
     Listeners listeners{};
     char cmd[]{"lsof -nP +c 0 -i4 2>&1"};
 
@@ -106,7 +106,9 @@ Listeners GetListeners(void) {
         }
     }
 
-    load_full_commands(listeners);
+    if (resolve_full_commands) {
+        load_full_commands(listeners);
+    }
 
     sort(listeners.begin(), listeners.end(), [] (Listener& lhs, Listener& rhs) { return lhs.port < rhs.port; });
     return listeners;

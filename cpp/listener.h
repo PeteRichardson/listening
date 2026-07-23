@@ -22,7 +22,7 @@ struct Listener {
 
 using Listeners = std::vector<Listener>;
 
-Listeners GetListeners(void);
+Listeners GetListeners(bool resolve_full_commands = false);
 
 std::ostream& operator<<(std::ostream&, const Listener&);
 
