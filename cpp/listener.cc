@@ -108,6 +108,6 @@ Listeners GetListeners(void) {
 
     load_full_commands(listeners);
 
-    sort(listeners.begin(), listeners.end(), [] (Listener& lhs, Listener& rhs) { return lhs.port < rhs.port; });
+    sort(listeners.begin(), listeners.end(), [] (const Listener& lhs, const Listener& rhs) { return lhs.port < rhs.port; });
     return listeners;
 }
