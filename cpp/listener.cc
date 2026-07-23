@@ -69,7 +69,10 @@ void load_full_commands(std::vector<Listener> & listeners) {
             ss >> pid >> std::ws;
             if (pid != -1) {
                 getline(ss, full_command);
-                pid_lookup_table.at(pid).full_command = full_command;
+                auto it = pid_lookup_table.find(pid);
+                if (it != pid_lookup_table.end()) {
+                    it->second.full_command = full_command;
+                }
             };
         }
     }
