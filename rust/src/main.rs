@@ -134,7 +134,7 @@ impl ListenerHash {
 fn print_table(list: &ListenerHash) -> Result<(), Box<dyn Error>> {
     
     let mut listener_vec: Vec<Listener> = list.listeners.clone().into_iter().collect();
-    listener_vec.sort_by(|a, b| a.port.cmp(&b.port));
+    listener_vec.sort_by_key(|l| l.port);
     let mut table = Table::new(listener_vec);
     table
         .with(Style::rounded())
@@ -160,7 +160,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     if config.commands {
         // sort listeners by PID, dedup on PID, and print out full_commands
         let mut listener_vec: Vec<Listener> = listeners.listeners.into_iter().collect();
-        listener_vec.sort_by(|a, b| a.pid.cmp(&b.pid));
+        listener_vec.sort_by_key(|l| l.pid);
         listener_vec.dedup_by(|a, b| a.pid == b.pid);
         for listener in listener_vec {
             println!("{}: {}", listener.pid, listener.full_command);
