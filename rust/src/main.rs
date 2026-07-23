@@ -86,7 +86,8 @@ impl fmt::Display for Listener {
 }
 impl PartialEq for Listener {
     fn eq(&self, other: &Self) -> bool {
-        self.port == other.port
+        self.command == other.command && self.pid == other.pid
+            && self.port == other.port && self.inaddr == other.inaddr
     }
 }
 impl Eq for Listener {}
