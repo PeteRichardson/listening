@@ -48,7 +48,7 @@ int main(int argc, char*argv[]) {
 
     ParseOptions(argc, argv);
             
-    auto listeners = GetListeners();
+    auto listeners = GetListeners(options.show_full_commands);
 
     // Set up formatted table for output.   See https://github.com/seleznevae/libfort
     fort::char_table table;

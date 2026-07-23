@@ -27,7 +27,7 @@ if let onlyArg = args.first {
     }
 }
 
-let listeners = Listeners().sorted(by: { $0.port < $1.port })
+let listeners = Listeners(resolveFullCommand: showFullCommands).sorted(by: { $0.port < $1.port })
 for listener in listeners {
     print(listener)
 }
