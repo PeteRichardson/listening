@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.18)
 
 project(listening)
 
+enable_testing()
+
 SET(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build architectures for Mac OS X" FORCE)
 
 # Make a static libfort library with only fort.c and fort.hpp
@@ -38,3 +40,4 @@ add_executable(listener_tests
 )
 target_compile_features(listener_tests PUBLIC cxx_std_20)
 target_include_directories(listener_tests PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+add_test(NAME listener_tests COMMAND listener_tests)
