@@ -62,7 +62,7 @@ impl Listener {
             .output()
             .unwrap();
 
-        let stdout = String::from_utf8(ports.stdout).expect("bad stdout from echo");
+        let stdout = String::from_utf8(ports.stdout).expect("bad stdout from ps");
         stdout.trim().to_string()
     }
 }
