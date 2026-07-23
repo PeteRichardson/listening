@@ -60,7 +60,7 @@ struct Listener : CustomStringConvertible {
     /#
     
     /// use regex to create a Listener from a line from the output of /usr/sbin/lsof -nP +c 0 -i4
-    init?(_ lsofRow : String) {
+    init?(_ lsofRow : String, resolveFullCommand: Bool = false) {
         guard let match = try? Self.lsofRegex.wholeMatch(in: lsofRow) else {
             //            print("# ERROR: Listener(\"\(lsofRow)\") init failed.")
             return nil
@@ -80,7 +80,7 @@ struct Listener : CustomStringConvertible {
         node        = String(match.node)
         inaddr      = String(match.inaddr)
         action      = String(match.action)
-        fullCommand = Listener.getFullCommand(pid: pid)
+        fullCommand = resolveFullCommand ? Listener.getFullCommand(pid: pid) : ""
     }
 
     /// look up the full invocation command line for a PID via `ps`
@@ -108,7 +108,7 @@ struct Listener : CustomStringConvertible {
 /// Allows you to just do:   for listener in Listeners() { ... }
 typealias Listeners = [Listener]
 extension Listeners {
-    init() {
+    init(resolveFullCommand: Bool = false) {
         // Get the stdout, stderr and status of the lsof shell command
         // Note that the definition of the Listener struct initializers assumes the
         // exact output of this hardcoded command.
@@ -121,7 +121,7 @@ extension Listeners {
         // Try to instantiate a listener from each line
         // if Listener.init can't parse a line it returns nil and is tossed out by compactMap
         if let lines = stdout?.components(separatedBy: "\n") {
-            self.init(lines.compactMap { Listener($0) })
+            self.init(lines.compactMap { Listener($0, resolveFullCommand: resolveFullCommand) })
         } else {
             self.init()
         }
