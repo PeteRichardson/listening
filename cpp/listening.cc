@@ -14,19 +14,28 @@ fort::char_table& operator<<(fort::char_table& out, Listener l) {
     return out;
 }
 
-void UsageAndQuit(char* first_arg) {
+void PrintUsage(char* first_arg, std::ostream& out) {
     auto exe_name = std::filesystem::path(first_arg).stem().string();
-    std::cerr << "# usage: " << exe_name << " [-c]    # Show IPv4 TCP ports open for listening\n";
-    std::cerr << "#          -c     # list full invocation command lines after table" << std::endl;
+    out << "# usage: " << exe_name << " [-c]    # Show IPv4 TCP ports open for listening\n";
+    out << "#          -c     # list full invocation command lines after table" << std::endl;
+}
+
+void UsageAndQuit(char* first_arg) {
+    PrintUsage(first_arg, std::cerr);
     exit(EXIT_FAILURE);
 }
 
 void ParseOptions(int argc, char* argv[]) {
     // only option is optional -c
     // otherwise, show usage and quit.
+    if (argc == 2 && (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0)) {
+        PrintUsage(argv[0], std::cout);
+        exit(EXIT_SUCCESS);
+    }
+
     if  (argc > 2)
         UsageAndQuit(argv[0]);
-    
+
     if (argc == 2) {
         if (strcmp(argv[1], "-c") == 0)
             options.show_full_commands = true;
