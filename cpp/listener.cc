@@ -41,12 +41,12 @@ std::ostream& operator<<(std::ostream& out, Listener l) {
 }
 
 void load_full_commands(std::vector<Listener> & listeners) {
-    std::map<pid_t, Listener&> pid_lookup_table{};
+    std::map<pid_t, Listener*> pid_lookup_table{};
 
     std::stringstream pids{};
     for (auto & l : listeners) {
         pids << l.pid << ",";
-        pid_lookup_table.insert( std::pair<int, Listener&>(l.pid, l));
+        pid_lookup_table.insert({l.pid, &l});
     }
     std::string cmd{"ps -o pid=\"\",command=\"\" -p "};
     cmd = cmd + pids.str();
@@ -71,8 +71,9 @@ void load_full_commands(std::vector<Listener> & listeners) {
                 getline(ss, full_command);
                 auto it = pid_lookup_table.find(pid);
                 if (it != pid_lookup_table.end()) {
-                    it->second.full_command = full_command;
+                    it->second->full_command = full_command;
                 }
+
             };
         }
     }
