@@ -65,12 +65,16 @@ struct Listener : CustomStringConvertible {
             //            print("# ERROR: Listener(\"\(lsofRow)\") init failed.")
             return nil
         }
-        
+
+        guard let parsedPort = Int(String(match.port)), let parsedPid = Int(String(match.pid)) else {
+            return nil
+        }
+
         // TODO:  Just call init() with info below, and make this a convenience initializer?
-        
-        port        = Int(String(match.port)) ?? 0
+
+        port        = parsedPort
         command     = String(match.command).replacingOccurrences(of: "\\x20", with: " ")
-        pid         = Int(String(match.pid)) ?? 0
+        pid         = parsedPid
         fd          = String(match.fd)
         user        = String(match.user)
         node        = String(match.node)
