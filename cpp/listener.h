@@ -17,7 +17,7 @@ struct Listener {
     std::string action{"LISTEN"};
     std::string full_command{};
 
-    Listener(std::string);
+    explicit Listener(std::string);
 };
 
 using Listeners = std::vector<Listener>;
