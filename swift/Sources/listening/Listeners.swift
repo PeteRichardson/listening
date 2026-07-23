@@ -113,17 +113,16 @@ extension Listeners {
         // Note that the definition of the Listener struct initializers assumes the
         // exact output of this hardcoded command.
         // Be careful if you change the args, or if you upgrade your OS (!)
-        let (stdout, _, _) = shell("/usr/sbin/lsof", ["-nP","+c", "0", "-i4"])
-        
-        // TODO:   Should really check the status code and print the stderr output
-        //          e.g. if lsof isn't in /usr/sbin, this will fail and return an empty array
-        
+        let (stdout, stderr, status) = shell("/usr/sbin/lsof", ["-nP","+c", "0", "-i4"])
+
+        guard let stdout, status == 0 else {
+            FileHandle.standardError.write("Error running lsof: \(stderr ?? "unknown error")\n".data(using: .utf8)!)
+            exit(EXIT_FAILURE)
+        }
+
         // Try to instantiate a listener from each line
         // if Listener.init can't parse a line it returns nil and is tossed out by compactMap
-        if let lines = stdout?.components(separatedBy: "\n") {
-            self.init(lines.compactMap { Listener($0) })
-        } else {
-            self.init()
-        }
+        let lines = stdout.components(separatedBy: "\n")
+        self.init(lines.compactMap { Listener($0) })
     }
 }
