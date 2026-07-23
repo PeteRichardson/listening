@@ -120,7 +120,7 @@ impl ListenerHash {
 
         //'lsof -nP +c 0 -i4' command returns lines like the following:
         //node                        10166 pete   31u  IPv4 0xe4ad34249b227fc5      0t0  TCP 127.0.0.1:45623 (LISTEN)
-        for line in stdout.lines().skip(1).collect::<HashSet<_>>() {
+        for line in stdout.lines().collect::<HashSet<_>>() {
             if line.ends_with("(LISTEN)") {
                 listeners_hash.insert(Listener::new(line));
             }
