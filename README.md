@@ -26,3 +26,9 @@ Versions in Swift, Cpp and Rust
 * **C++:**   `cd cpp && cmake -B build && cmake --build build && ./build/listening`
 * **Rust:**  `cd rust && cargo run --release`
 
+## Testing
+
+* **Swift:** `cd swift && swift test`
+* **C++:**   `cd cpp && cmake -B build && cmake --build build --target listener_tests && ./build/listener_tests`
+* **Rust:**  `cd rust && cargo test`
+
