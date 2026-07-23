@@ -1,6 +1,5 @@
 use clap::Parser;
 use std::collections::HashSet;
-use std::error::Error;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::process::Command;
@@ -132,8 +131,7 @@ impl ListenerHash {
     }
 }
 
-fn print_table(list: &ListenerHash) -> Result<(), Box<dyn Error>> {
-    
+fn print_table(list: &ListenerHash) {
     let mut listener_vec: Vec<Listener> = list.listeners.clone().into_iter().collect();
     listener_vec.sort_by_key(|l| l.port);
     let mut table = Table::new(listener_vec);
@@ -149,14 +147,13 @@ fn print_table(list: &ListenerHash) -> Result<(), Box<dyn Error>> {
         .modify(Columns::new(3..4), Alignment::right());
 
     println!("{}", table);
-    Ok(())
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     let config = Config::parse();
 
     let listeners = ListenerHash::new();
-    print_table(&listeners).expect("Failed to output listeners table");
+    print_table(&listeners);
 
     if config.commands {
         // sort listeners by PID, dedup on PID, and print out full_commands
@@ -167,5 +164,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             println!("{}: {}", listener.pid, listener.full_command);
         }
     };
-    Ok(())
 }
