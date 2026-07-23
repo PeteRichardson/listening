@@ -51,7 +51,7 @@ impl Listener {
             user: splits[2].to_string(),
             node: splits[7].to_string(),
             inaddr: inaddr.to_string(),
-            action: "LISTEN".to_string(), // todo: trim parens off this value
+            action: "LISTEN".to_string(),
             full_command: Listener::get_full_command(pid),
         }
     }
