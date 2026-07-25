@@ -1,1 +1,4 @@
 build/
+
+# Shared scratch dir for ephemeral Claude Code skill output (e.g. pr-triage snapshots)
+.claude/tmp/
